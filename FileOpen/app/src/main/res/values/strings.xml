@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">FileOpen</string>
+    <string name="action_settings">Settings</string>
+    <string name="filePath">File path</string>
+    <string name="write">Write file</string>
+    <string name="read">Read file</string>
+    <string name="writeToSSD">Write file to SD</string>
+    <string name="readFromSD">Read from SD</string>
+</resources>

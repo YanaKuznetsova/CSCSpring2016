@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">AddressBook</string>
+    <string name="action_settings">Settings</string>
+    <string name="name">Name:</string>
+    <string name="phone">Phone:</string>
+    <string name="email">E-Mail:</string>
+    <string name="street">Street:</string>
+    <string name="city">City:</string>
+    <string name="hint_name">John Smith</string>
+    <string name="hint_phone">123-456-790</string>
+    <string name="hint_email">john@email.com</string>
+    <string name="hint_street">1 Main St.</string>
+    <string name="hint_city">Some Town, 012345</string>
+    <string name="address">Address</string>
+    <string name="button_save_contact">Save Contact</string>
+    <string name="menuitem_add_contact">Add contact</string>
+    <string name="menuitem_edit_contact">Edit contact</string>
+    <string name="menuitem_delete_contact">Delete contact</string>
+    <string name="errorTitle">Error</string>
+    <string name="errorMessage">No contact found</string>
+    <string name="errorButton">OK</string>
+    <string name="confirmTitle">Confirm</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="confirmMessage">Are you sure?</string>
+</resources>

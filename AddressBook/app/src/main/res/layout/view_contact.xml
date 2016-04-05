@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/TableRow0">
+
+        <TextView
+            android:id="@+id/nameLabelTextView"
+            style="@style/ContactLabelTextView"
+            android:text="@string/name"/>
+
+        <TextView
+            android:id="@+id/nameTextView"
+            style="@style/ContactTextView"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/TableRow1">
+
+        <TextView
+            android:id="@+id/phoneLabelTextView3"
+            android:text="@string/phone"
+            style="@style/ContactLabelTextView"/>
+
+        <TextView
+            android:id="@+id/phoneTextView"
+            style="@style/ContactTextView"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/TableRow2">
+
+        <TextView
+            android:id="@+id/emailLabelTextView"
+            android:text="@string/email"
+            style="@style/ContactLabelTextView"/>
+
+        <TextView
+            android:id="@+id/emailTextView"
+            style="@style/ContactTextView"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/TableRow3">
+
+        <TextView
+            android:id="@+id/streetLabelTextView"
+            android:text="@string/street"
+            style="@style/ContactLabelTextView"/>
+
+        <TextView
+            android:id="@+id/streetTextView"
+            style="@style/ContactTextView"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/TableRow4">
+
+        <TextView
+            android:id="@+id/cityLabelTextView"
+            android:text="@string/city"
+            style="@style/ContactLabelTextView"/>
+
+        <TextView
+            android:id="@+id/cityTextView"
+            style="@style/ContactTextView"/>
+    </TableRow>
+
+</TableLayout>

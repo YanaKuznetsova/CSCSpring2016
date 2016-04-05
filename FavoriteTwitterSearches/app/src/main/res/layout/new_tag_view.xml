@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/newTagTableRow"
+    android:background="@android:color/transparent">
+
+    <Button
+        android:layout_width="@dimen/tagButtonWidth"
+        android:layout_height="wrap_content"
+        android:id="@+id/newTagButton"
+        />
+
+    <Button
+        android:layout_width="@dimen/editButtonWidth"
+        android:layout_height="wrap_content"
+        android:text="@string/edit"
+        android:id="@+id/newEditButton" />
+</TableRow>

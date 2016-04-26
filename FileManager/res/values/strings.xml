@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">BookTranslator</string>
+    <string name="action_settings">Settings</string>
+    <string name="dialog_title">Confirmation</string>
+    <string name="dialog_mess">Do you want to open file </string>
+    <string name="positiveButton">Yes</string>
+    <string name="negativeButton">No</string>
+</resources>

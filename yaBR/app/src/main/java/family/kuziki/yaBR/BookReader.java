@@ -37,43 +37,46 @@ public class BookReader extends Activity implements View.OnLongClickListener {
     private EditText text;
     private TextView bookTitle;
     private EBookWrapper eBookWrapper;
-    private static final String PREFS = "prefs";
+    public static Database database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.book_reader);
         this.fileToOpen = this.getIntent().getStringExtra("fileToOpen");
+        boolean fromLibrary = this.getIntent().getBooleanExtra("fromLibrary", false);
         if (fileToOpen != null) {
             Library library = Library.getInstance();
             try {
                 fileName = this.getIntent().getStringExtra("fileName");
                 Log.d("BookReader", fileToOpen);
                 Log.d("BookReader", fileName);
-                LibraryItem newItem = library.getBookInfo(fileName);
-                newItem.setFilepath(fileToOpen);
-                library.addLibraryItem(newItem);
-                saveBooks();
+
+                if (!fromLibrary) {
+                    LibraryItem newItem = library.getBookInfo(fileName);
+                    newItem.setFilepath(fileToOpen);
+                    library.addLibraryItem(newItem);
+                    Library.getInstance().saveBooks(this);
+                }
+
                 text = (EditText) findViewById(R.id.openedFile);
                 text.setMovementMethod(new ScrollingMovementMethod());
+
                 bookTitle = (TextView) findViewById(R.id.bookTitle_textView);
                 //text.setOnClickListener(this);
                 text.setOnLongClickListener(this);
+
                 readFile();
                 update();
+                database = new Database(this);
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-    }
-
-    private void saveBooks() {
-        Log.d("BookReader", "saveBooks");
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
-        Library library = Library.getInstance();
-        library.saveBooks(sharedPreferences);
     }
 
     private void readFile() {
@@ -98,6 +101,7 @@ public class BookReader extends Activity implements View.OnLongClickListener {
 
     public String convertTitle() {
         String bookTitle = fileName.replace("_", " ");
+        bookTitle = bookTitle.replace("-", " ");
         Pattern p = Pattern.compile("^*.\\w\\w\\w$");
         return (p.matcher(bookTitle).replaceAll(""));
     }
@@ -164,9 +168,9 @@ public class BookReader extends Activity implements View.OnLongClickListener {
     public boolean onLongClick(View view) {
         try {
             Log.d("BookReader", "translate");
-            Translator.getInstance().translate("Hello world!");
+            Translator.getInstance().translate("Hello world!", database);
             Log.d("BookReader", "translate2");
-            Translator.getInstance().translate(getWord());
+            Translator.getInstance().translate(getWord(), database);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

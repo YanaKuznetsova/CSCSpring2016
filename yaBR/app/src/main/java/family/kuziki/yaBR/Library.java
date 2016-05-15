@@ -1,11 +1,12 @@
 package family.kuziki.yaBR;
 
-
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
@@ -16,6 +17,7 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +28,7 @@ public class Library {
     private static final String TITLE = "title";
     private static final String AUTHOR = "author";
     private static final String COVER = "cover";
+    private static final String PREFS = "prefs";
 
     ArrayList<LibraryItem> libraryItems;
 
@@ -59,6 +62,7 @@ public class Library {
     public LibraryItem getBookInfo(String fileName) throws ExecutionException, InterruptedException {
         String urlString = "";
         String bookTitle = fileName.replace("_", " ");
+        bookTitle = bookTitle.replace("-", " ");
         Pattern p = Pattern.compile("^*.\\w\\w\\w$");
         bookTitle = p.matcher(bookTitle).replaceAll("");
         try {
@@ -101,33 +105,27 @@ public class Library {
         return response;
     }
 
-    public void saveBooks(SharedPreferences sharedPreferences) {
+    public void saveBooks(Context context) throws IOException {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         Log.d("Library", "saveBooks");
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         for (int i = 0; i < libraryItems.size(); i++){
             LibraryItem item = libraryItems.get(i);
-
-            if (item.getCover() != null) {
-                String imageID = item.getCover();
-                String cover = i + "_" + COVER;
-                editor.putString(cover, imageID);
-            }
-            String bookTitle = "";
-            String authorName = "";
-            if (item.getTitle() != null) {
-                bookTitle = item.getTitle();
-                String title = i + "_" + TITLE;
-                editor.putString(title, bookTitle);
-            }
-            if (item.getAuthor()!= null) {
-                authorName = item.getAuthor();
-                String author = i + "_" + AUTHOR;
-                editor.putString(author, authorName);
-            }
+            editor.putString("Book_"+i, serialize(item));
         }
         editor.commit();
         Log.d("Library", "editorCommit");
+    }
+
+    public void loadBooks(Context context) throws JSONException, IOException, ClassNotFoundException {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        Map<String,?> keys = sharedPreferences.getAll();
+        for (Map.Entry<String, ?> entry : keys.entrySet()) {
+            String[] item = entry.getKey().split("_");
+            LibraryItem li = Library.deserialize((String) entry.getValue());
+            addLibraryItem(li);
+        }
     }
 
     public static String serialize(LibraryItem li) throws IOException {

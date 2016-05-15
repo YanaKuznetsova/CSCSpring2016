@@ -16,9 +16,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.Map;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
 
@@ -27,7 +26,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     LibraryAdapter libraryAdapter;
     Button mainButton;
     EditText mainEditText;
-    public SharedPreferences sharedPreferences;
     ShareActionProvider shareActionProvider;
     private static final String TITLE = "title";
     private static final String AUTHOR = "author";
@@ -48,44 +46,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //setShareIntent();
         libraryAdapter = new LibraryAdapter(this, getLayoutInflater());
         try {
-            loadBooks();
+            SharedPreferences sharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
+            Library.getInstance().loadBooks(this);
+            libraryAdapter.updateData();
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         mainListView.setAdapter(libraryAdapter);
 
     }
 
-    private void loadBooks() throws JSONException {
-        sharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
-        Map<String,?> keys = sharedPreferences.getAll();
-        int numOfItems = 0;
-        for (Map.Entry<String, ?> entry : keys.entrySet()) {
-            numOfItems++;
-        }
-        String[][] books = new String[numOfItems][3];
-        for (Map.Entry<String, ?> entry : keys.entrySet()) {
-            String[] item = entry.getKey().split("_");
-            Log.d("map", entry.getKey());
-            Log.d("map", item[0]);
-            Log.d("map", item[1]);
-            int id = Integer.parseInt(item[0]);
-            String type = item[1];
-            Log.d("map", String.valueOf(entry.getValue()));
-            if (type.equals(TITLE)) {
-                books[id][0] = (String) entry.getValue();
-            }
-            if (type.equals(AUTHOR)) {
-                books[id][1] = (String) entry.getValue();
-            }
-            if (type.equals(COVER)) {
-                books[id][2] = (String) entry.getValue();
-            }
-        }
-
-        for (int i = 0; i < numOfItems; i++) {
-            Library.getInstance().addLibraryItem(new LibraryItem(books[i][0], books[i][1], books[i][2], null));
-        }
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
         libraryAdapter.updateData();
     }
 
@@ -134,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("MainActivity", item.getFilepath());
         bookReaderIntent.putExtra("fileName", item.getTitle());
         Log.d("MainActivity", item.getTitle());
+        bookReaderIntent.putExtra("fromLibrary", true);
         startActivity(bookReaderIntent);
     }
 

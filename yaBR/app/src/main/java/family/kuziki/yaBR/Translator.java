@@ -1,6 +1,10 @@
 package family.kuziki.yaBR;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,18 +41,43 @@ public class Translator {
         public static Translator instance = new Translator();
     }
 
-    public String translate(String text) throws InterruptedException {
+    public String translate(String word, Database database) throws InterruptedException {
+        SQLiteDatabase db = database.getWritableDatabase();
+        // check the word
+        Cursor cursor = db.query("mytable", null, null, null, null, null, null);
+        String translation = null;
+        if(cursor.moveToFirst()) {
+            int wordColIndex = cursor.getColumnIndex("word");
+            int translationColIndex = cursor.getColumnIndex("translation");
+            do {
+                String possibleWord = cursor.getString(wordColIndex);
+                if (possibleWord.equals(word)) {
+                    translation = cursor.getString(translationColIndex);
+                    Log.d("Translator_Database", "word is found!");
+                }
+            } while (cursor.moveToNext());
+        }
+        if (translation != null) {
+            db.close();
+            return translation;
+        }
+        // if DB doesn't contain the word, add it to the DB
         RequestResponse request = null;
         try {
-            request = sendRequest(text);
+            request = sendRequest(word);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         String response = parseReceivedRequest(request);
         Log.d("Translator", response);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("word", word);
+        contentValues.put("translation", response);
+        long rowID = db.insert("mytable", null, contentValues);
+        Log.d("Translator_Database", String.valueOf(rowID));
+        db.close();
         return response;
     }
 
@@ -62,7 +91,7 @@ public class Translator {
     }
 
     private RequestResponse sendRequest(String searchString) throws ExecutionException, InterruptedException, JSONException {
-        // Prepare your search string to be put in a URL
+        // Prepare search string to be put in a URL
         String urlString = "";
         try {
             urlString = URLEncoder.encode(searchString, "UTF-8");

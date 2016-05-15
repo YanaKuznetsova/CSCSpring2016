@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:omgandroid="http://schemas.android.com/apk/res-auto">
+    <!-- Share item -->
+    <item
+        android:id="@+id/menu_item_share"
+        android:title="Share"
+        omgandroid:showAsAction="ifRoom"
+        omgandroid:actionProviderClass= "android.support.v7.widget.ShareActionProvider" />
+</menu>

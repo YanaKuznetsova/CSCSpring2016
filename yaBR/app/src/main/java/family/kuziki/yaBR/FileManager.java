@@ -27,6 +27,7 @@ public class FileManager extends ListActivity {
     //when application started
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d("FileManager", "onCreate");
         super.onCreate(savedInstanceState);
         //set file_manager_main layout
         setContentView(R.layout.file_manager_main);
@@ -60,6 +61,7 @@ public class FileManager extends ListActivity {
         } else {
             Intent bookReaderIntent = new Intent(FileManager.this, BookReader.class);
             bookReaderIntent.putExtra("fileToOpen", aDirectory.getAbsolutePath());
+            bookReaderIntent.putExtra("fileName", aDirectory.getName());
             startActivity(bookReaderIntent);
         }
     }

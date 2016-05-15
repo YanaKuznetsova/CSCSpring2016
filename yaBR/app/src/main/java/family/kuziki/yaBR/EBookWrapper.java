@@ -8,6 +8,9 @@ public class EBookWrapper {
 
     private int position;
     private String text;
+    private String author;
+    private String title;
+    private String cover;
     private EBook eBook;
     private static final int pageCapacity = 1500;
 
@@ -16,6 +19,14 @@ public class EBookWrapper {
         this.text = text;
         this.position = 0;
     }
+
+    public EBookWrapper(EBook eBook, String text, String title) {
+        this.eBook = eBook;
+        this.text = text;
+        this.position = 0;
+        this.title = title;
+    }
+
 
     public EBookWrapper(EBook eBook, String text, int position) {
         this(eBook, text);
@@ -28,6 +39,10 @@ public class EBookWrapper {
 
     public int getPosition(){
         return position;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getPage(){
@@ -48,4 +63,6 @@ public class EBookWrapper {
 //        int end = beginning + pageCapacity;
 //        Log.d("end", String.valueOf(end));
     }
+
+
 }

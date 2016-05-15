@@ -9,10 +9,11 @@
         android:allowBackup="true"
         android:icon="@drawable/yabr"
         android:supportsRtl="true"
+        android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
         <activity
-            android:name="family.kuziki.yaBR.FileManager"
+            android:name="family.kuziki.yaBR.MainActivity"
             android:label="yaBR"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -23,9 +24,16 @@
 
         <activity
             android:name="family.kuziki.yaBR.BookReader"
-            android:parentActivityName="family.kuziki.yaBR.FileManager"
+            android:parentActivityName="family.kuziki.yaBR.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+
+        <activity
+            android:name="family.kuziki.yaBR.FileManager"
+            android:parentActivityName="family.kuziki.yaBR.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
 
         <meta-data
             android:name="com.google.android.gms.version"

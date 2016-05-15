@@ -25,16 +25,6 @@ public class Translator {
     private static final String urlTranslate = "https://translate.yandex.net/api/v1.5/tr.json/translate?&lang=ru&format=plain&text=";
     private static final String apiKey = "&key=trnsl.1.1.20160425T151703Z.4adf02246a2895da.3ea89905d8057da0427aaef1a2eb984bb2cd5a6b";
 
-    private static class RequestResponse{
-        private boolean isDone;
-        private JSONObject receivedResponse;
-
-        private RequestResponse (){
-            isDone = false;
-            receivedResponse = null;
-        }
-    }
-
     // Singleton
     private Translator(){
     }
@@ -64,7 +54,7 @@ public class Translator {
 
     private String parseReceivedRequest(RequestResponse request) {
         try {
-            return request.receivedResponse.getString("text").toString();
+            return request.getResponse().getString("text").toString();
         } catch (JSONException e) {
             e.printStackTrace();
             return "Translation failed";
@@ -84,9 +74,8 @@ public class Translator {
         Log.d("Translator" , "URL :" +s);
         final RequestResponse response = new RequestResponse();
 
-        String responseText = new GetJSONTask().execute(s).get();
-        response.isDone = true;
-        response.receivedResponse = new JSONObject(responseText);
+        response.setResponse(new GetJSONTask().execute(s).get());
+        response.setIsDone();
 
         return response;
     }

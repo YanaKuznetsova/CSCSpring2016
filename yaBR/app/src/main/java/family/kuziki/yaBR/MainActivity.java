@@ -19,6 +19,10 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
+import family.kuziki.yaBR.library.Library;
+import family.kuziki.yaBR.library.LibraryAdapter;
+import family.kuziki.yaBR.library.LibraryItem;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
 
     TextView mainTextView;

@@ -3,16 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
+    <TextView
         android:scrollbars="vertical"
         android:layout_alignParentTop="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:editable="false"
         android:padding="10dp"
         android:id="@+id/openedFile"
         android:textIsSelectable="true"
-        android:isScrollContainer="true"
         android:maxLines = "50"
          />
 

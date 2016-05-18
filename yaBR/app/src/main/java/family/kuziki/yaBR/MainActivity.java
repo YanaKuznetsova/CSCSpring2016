@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent bookReaderIntent = new Intent(MainActivity.this, BookReader.class);
         bookReaderIntent.putExtra("fileToOpen", item.getFilepath());
         Log.d("MainActivity", item.getFilepath());
-        bookReaderIntent.putExtra("fileName", item.getTitle());
+        bookReaderIntent.putExtra("title", item.getTitle());
         Log.d("MainActivity", item.getTitle());
         bookReaderIntent.putExtra("fromLibrary", true);
         startActivity(bookReaderIntent);

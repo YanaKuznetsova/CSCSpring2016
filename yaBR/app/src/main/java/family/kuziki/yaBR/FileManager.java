@@ -61,7 +61,7 @@ public class FileManager extends ListActivity {
         } else {
             Intent bookReaderIntent = new Intent(FileManager.this, BookReader.class);
             bookReaderIntent.putExtra("fileToOpen", aDirectory.getAbsolutePath());
-            bookReaderIntent.putExtra("fileName", aDirectory.getName());
+            bookReaderIntent.putExtra("title", aDirectory.getName());
             startActivity(bookReaderIntent);
         }
     }

@@ -17,12 +17,27 @@ public class Pagination {
     private final ArrayList<CharSequence> pages;
     private final CharSequence source;
     private final TextView textView;
+    private int currentPage;
 
     public Pagination(CharSequence source, TextView view) {
         this.source = source;
         this.textView = view;
         pages = new ArrayList<>();
+        currentPage = 0;
 
+        layout();
+    }
+
+    public CharSequence getPage() {
+        return pages.get(currentPage);
+    }
+
+    public void nextPage() {
+        currentPage = Math.min(currentPage+1, pages.size());
+    }
+
+    public void previousPage() {
+        currentPage = Math.max(currentPage-1, 0);
     }
 
     private void layout() {

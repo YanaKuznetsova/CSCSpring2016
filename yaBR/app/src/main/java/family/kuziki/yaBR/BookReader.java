@@ -2,6 +2,7 @@ package family.kuziki.yaBR;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.text.method.ScrollingMovementMethod;
@@ -11,7 +12,7 @@ import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.EditText;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,13 +31,12 @@ import ebook.parser.*;
 import family.kuziki.yaBR.library.Library;
 import family.kuziki.yaBR.library.LibraryItem;
 import family.kuziki.yaBR.translation.Database;
-import family.kuziki.yaBR.translation.Translator;
 
 //public class BookReader extends Activity implements View.OnClickListener, View.OnLongClickListener {
 public class BookReader extends Activity {
 
     public String fileToOpen;
-    public String fileName;
+    public String title;
     private TextView text;
     private TextView bookTitle;
     private EBookWrapper eBookWrapper;
@@ -46,38 +46,32 @@ public class BookReader extends Activity {
     private float pointY;
     private long startClickTime;
     private boolean isClick = false;
+    private boolean fromLibrary;
 
     private int screenWidth;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.book_reader);
-        this.fileToOpen = this.getIntent().getStringExtra("fileToOpen");
-        boolean fromLibrary = this.getIntent().getBooleanExtra("fromLibrary", false);
-        if (fileToOpen != null) {
+    private Pagination pagination;
+
+    private class BookLoader extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
             Library library = Library.getInstance();
             try {
-                fileName = this.getIntent().getStringExtra("fileName");
+
                 Log.d("BookReader", fileToOpen);
-                Log.d("BookReader", fileName);
+                Log.d("BookReader", title);
 
                 if (!fromLibrary) {
-                    LibraryItem newItem = library.getBookInfo(fileName);
+                    LibraryItem newItem = library.getBookInfo(title);
                     newItem.setFilepath(fileToOpen);
                     library.addLibraryItem(newItem);
-                    Library.getInstance().saveBooks(this);
+                    Library.getInstance().saveBooks(BookReader.this);
                 }
 
-                text = (TextView) findViewById(R.id.openedFile);
-                text.setMovementMethod(new ScrollingMovementMethod());
-
-                bookTitle = (TextView) findViewById(R.id.bookTitle_textView);
-                //text.setOnClickListener(this);
-
                 readFile();
-                update();
-                database = new Database(this);
+                pagination = new Pagination(eBookWrapper.getText(), text);
+
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
@@ -85,6 +79,41 @@ public class BookReader extends Activity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            bookTitle.setText(eBookWrapper.getTitle());
+            update();
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.book_reader);
+        this.fileToOpen = this.getIntent().getStringExtra("fileToOpen");
+        fromLibrary = this.getIntent().getBooleanExtra("fromLibrary", false);
+        if (fileToOpen != null) {
+            title = this.getIntent().getStringExtra("title");
+            text = (TextView) findViewById(R.id.openedFile);
+            text.setMovementMethod(new ScrollingMovementMethod());
+
+            bookTitle = (TextView) findViewById(R.id.bookTitle_textView);
+            database = new Database(BookReader.this);
+
+            text.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    String loading = "\n\n Loading...";
+                    text.setText(loading);
+                    new BookLoader().execute();
+                }
+            });
+
         }
 
         saveScreenParameters();
@@ -157,7 +186,7 @@ public class BookReader extends Activity {
             in = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
             String str = "";
             while ((str = in.readLine()) != null) {
-                sb.append(str);
+                sb.append(str + "\n");
             }
         } catch (FileNotFoundException e) {
             Log.d("BookReader: ", "file to open not found " + e.toString());
@@ -171,7 +200,10 @@ public class BookReader extends Activity {
     }
 
     public String convertTitle() {
-        String bookTitle = fileName.replace("_", " ");
+        if (fromLibrary) {
+            return title;
+        }
+        String bookTitle = title.replace("_", " ");
         bookTitle = bookTitle.replace("-", " ");
         Pattern p = Pattern.compile("^*.\\w\\w\\w$");
         return (p.matcher(bookTitle).replaceAll(""));
@@ -180,9 +212,7 @@ public class BookReader extends Activity {
     public void update() {
         text = (TextView) findViewById(R.id.openedFile);
         text.setMovementMethod(new ScrollingMovementMethod());
-        text.setText(eBookWrapper.getPage());
-        bookTitle = (TextView) findViewById(R.id.bookTitle_textView);
-        bookTitle.setText(eBookWrapper.getTitle());
+        text.setText(pagination.getPage());
     }
 
     public EBook parseBook() {
@@ -223,13 +253,13 @@ public class BookReader extends Activity {
 
     private void goToPreviousPage() {
         //Toast.makeText(this, "Previous page", Toast.LENGTH_LONG).show();
-        eBookWrapper.previousPage();
+        pagination.previousPage();
         update();
     }
 
     private void goToNextPage() {
         //Toast.makeText(this, "Next page", Toast.LENGTH_LONG).show();
-        eBookWrapper.nextPage();
+        pagination.nextPage();
         update();
     }
 

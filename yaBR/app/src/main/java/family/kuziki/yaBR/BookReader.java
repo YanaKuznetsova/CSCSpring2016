@@ -1,11 +1,17 @@
 package family.kuziki.yaBR;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.os.Vibrator;
+import android.support.v4.content.ContextCompat;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
+import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -22,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -31,6 +38,7 @@ import ebook.parser.*;
 import family.kuziki.yaBR.library.Library;
 import family.kuziki.yaBR.library.LibraryItem;
 import family.kuziki.yaBR.translation.Database;
+import family.kuziki.yaBR.translation.Translator;
 
 //public class BookReader extends Activity implements View.OnClickListener, View.OnLongClickListener {
 public class BookReader extends Activity {
@@ -40,19 +48,17 @@ public class BookReader extends Activity {
     private TextView text;
     private TextView bookTitle;
     private EBookWrapper eBookWrapper;
-    public static Database database;
-
+    private Database database;
     private float pointX;
     private float pointY;
     private long startClickTime;
     private boolean isClick = false;
     private boolean fromLibrary;
-
     private int screenWidth;
 
     private Pagination pagination;
 
-    private class BookLoader extends AsyncTask<Void, Void, Void> {
+    private class BookLoader extends AsyncTask<Void, Integer, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -62,15 +68,33 @@ public class BookReader extends Activity {
                 Log.d("BookReader", fileToOpen);
                 Log.d("BookReader", title);
 
+                Parser p = new InstantParser();
+                EBook eBook = p.parse(fileToOpen);
+
+                if (eBook.title != null) {
+                    title = eBook.title;
+                }
+                Log.d("Parser", title);
+
                 if (!fromLibrary) {
-                    LibraryItem newItem = library.getBookInfo(title);
+                    LibraryItem newItem = library.getBookInfo(title);;
                     newItem.setFilepath(fileToOpen);
                     library.addLibraryItem(newItem);
                     Library.getInstance().saveBooks(BookReader.this);
                 }
 
-                readFile();
+                if (eBook.title == null) {
+                    eBook.title = convertTitle();
+                }
+                eBookWrapper = new EBookWrapper(eBook);
+
                 pagination = new Pagination(eBookWrapper.getText(), text);
+                pagination.layout(new Pagination.Task() {
+                    @Override
+                    public void action(int num) {
+                        publishProgress(num);
+                    }
+                });
 
             } catch (ExecutionException e) {
                 e.printStackTrace();
@@ -88,11 +112,19 @@ public class BookReader extends Activity {
             bookTitle.setText(eBookWrapper.getTitle());
             update();
         }
+
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            String loading = "\n\n Loading...\n\n" + progress[0] + "%";
+            text.setText(loading);
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         setContentView(R.layout.book_reader);
         this.fileToOpen = this.getIntent().getStringExtra("fileToOpen");
         fromLibrary = this.getIntent().getBooleanExtra("fromLibrary", false);
@@ -115,7 +147,6 @@ public class BookReader extends Activity {
             });
 
         }
-
         saveScreenParameters();
         text.setOnTouchListener(new OnSwipeTouchListener(this));
     }
@@ -127,9 +158,29 @@ public class BookReader extends Activity {
     }
 
     private void showToast(String msg) {
-        Toast toast = Toast.makeText(this, msg, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
+        Toast toast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER | Gravity.BOTTOM, 0, 50);
         toast.show();
+    }
+
+    private CharSequence highlight(CharSequence text) {
+        SpannableString result = new SpannableString(text);
+        StringBuilder sb = new StringBuilder();
+        int curPos = 0;
+        for (int i = 0; i < result.length(); i++) {
+            if (Character.isLetter(result.charAt(i))) {
+                sb.append(result.charAt(i));
+            }
+            if (result.charAt(i) == ' ') {
+                if (Translator.getInstance().usedWord(sb.toString(), database) != null) {
+                    result.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.userWord)), curPos, i, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                sb.setLength(0);
+                curPos = i + 1;
+            }
+        }
+
+        return result;
     }
 
     private String getWordOnPosition(int position, String string) {
@@ -149,7 +200,7 @@ public class BookReader extends Activity {
         }
     }
 
-    private void processLongClickEvent(View view, MotionEvent event) {
+    private void processLongClickEvent(View view, MotionEvent event) throws InterruptedException, MalformedURLException {
         vibrate(100);
 
         int position = text.getOffsetForPosition(event.getX(), event.getY());
@@ -162,8 +213,9 @@ public class BookReader extends Activity {
         if (word == null) {
             return;
         }
-
-        showToast(word);
+        Log.d("BookReader_translation", word);
+        String translation = Translator.getInstance().translate(word, database);
+        showToast(word + " = " + translation);
     }
 
     private void processClickEvent(MotionEvent event) {
@@ -179,26 +231,6 @@ public class BookReader extends Activity {
         v.vibrate(time);
     }
 
-    private void readFile() {
-        StringBuilder sb = new StringBuilder();
-        try (FileInputStream stream = new FileInputStream(new File(fileToOpen))) {
-            BufferedReader in = null;
-            in = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-            String str = "";
-            while ((str = in.readLine()) != null) {
-                sb.append(str + "\n");
-            }
-        } catch (FileNotFoundException e) {
-            Log.d("BookReader: ", "file to open not found " + e.toString());
-            e.printStackTrace();
-        } catch (IOException e) {
-            Log.d("BookReader: ", "problems with file reading" + e.toString());
-            e.printStackTrace();
-        }
-        String title = convertTitle();
-        eBookWrapper = new EBookWrapper(parseBook(), sb.toString(), title);
-    }
-
     public String convertTitle() {
         if (fromLibrary) {
             return title;
@@ -212,7 +244,7 @@ public class BookReader extends Activity {
     public void update() {
         text = (TextView) findViewById(R.id.openedFile);
         text.setMovementMethod(new ScrollingMovementMethod());
-        text.setText(pagination.getPage());
+        text.setText(highlight(pagination.getPage()));
     }
 
     public EBook parseBook() {
@@ -223,34 +255,6 @@ public class BookReader extends Activity {
         }
         return ebook;
     }
-
-//    public boolean onTouch(View v, MotionEvent event) {
-//        float xScreen = event.getX();
-//        float yScreen = event.getY();
-//
-//        switch (event.getAction()) {
-//            case MotionEvent.ACTION_DOWN: // нажатие
-//
-//                break;
-//            case MotionEvent.ACTION_SCROLL:
-//                goToNextPage();
-//                break;
-//            case MotionEvent.ACTION_MOVE: // движение
-//                if (xScreen > (text.getWidth() / 2)) {
-//                    Log.d("BookReader", "Next page");
-//                    goToNextPage();
-//                } else {
-//                    Log.d("BookReader", "Previous page");
-//                    goToPreviousPage();
-//                }
-//                break;
-//            case MotionEvent.ACTION_UP: // отпускание
-//            case MotionEvent.ACTION_CANCEL:
-//                break;
-//        }
-//        return true;
-//    }
-
     private void goToPreviousPage() {
         //Toast.makeText(this, "Previous page", Toast.LENGTH_LONG).show();
         pagination.previousPage();
@@ -262,43 +266,6 @@ public class BookReader extends Activity {
         pagination.nextPage();
         update();
     }
-
-
-//    @Override
-//
-//    public boolean onLongClick(View view) {
-//        try {
-//            Log.d("BookReader", "translate");
-//            Translator.getInstance().translate("Hello world!", database);
-//            Log.d("BookReader", "translate2");
-//            Translator.getInstance().translate(getWord(), database);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
-
-    private String getWord() {
-        int start = text.getSelectionStart();
-        Log.d("getWord_start", String.valueOf(start));
-        int end = text.getSelectionEnd();
-        Log.d("getWord_end", String.valueOf(end));
-        String copy = text.getText().toString().substring(start, end);
-        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        return copy;
-    }
-
-//    @Override
-//    public void onClick(View v) {
-//        float xScreen = v.getX();
-//        if (xScreen > (text.getWidth() / 2)) {
-//            Log.d("BookReader", "Next page");
-//            goToNextPage();
-//        } else {
-//            Log.d("BookReader", "Previous page");
-//            goToPreviousPage();
-//        }
-//    }
 
     private class OnSwipeTouchListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
         private static final float EPS = 10;
@@ -344,7 +311,13 @@ public class BookReader extends Activity {
 
         @Override
         public void onLongPress(MotionEvent e) {
-            processLongClickEvent(text, e);
+            try {
+                processLongClickEvent(text, e);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            } catch (MalformedURLException e1) {
+                e1.printStackTrace();
+            }
         }
 
         @Override

@@ -1,1 +1,1 @@
-include ':app', ':ebookParser-1.3-src'
+include ':app'

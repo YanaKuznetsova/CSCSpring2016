@@ -14,13 +14,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
-import family.kuziki.yaBR.GetJSONTask;
+import family.kuziki.yaBR.GetJSON;
 
 public class Library {
     private static final String IMAGE_URL_BASE = "http://covers.openlibrary.org/b/id/";
@@ -59,19 +60,17 @@ public class Library {
         return true;
     }
 
-    public LibraryItem getBookInfo(String fileName) throws ExecutionException, InterruptedException {
+    public LibraryItem getBookInfo(String fileName) throws ExecutionException, InterruptedException, MalformedURLException {
         String urlString = "";
         String bookTitle = fileName.replace("_", " ");
         bookTitle = bookTitle.replace("-", " ");
-        Pattern p = Pattern.compile("^*.\\w\\w\\w$");
-        bookTitle = p.matcher(bookTitle).replaceAll("");
         try {
             urlString = QUERY_URL + URLEncoder.encode(bookTitle, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         Log.d("query", "URL :" + urlString);
-        JSONObject response = new GetJSONTask().execute(urlString).get();
+        JSONObject response = new GetJSON(urlString).getJson();
         JSONObject jsonObject = response.optJSONArray("docs").optJSONObject(0);
         //Log.d("LibraryBookInfo_response", jsonObject.toString());
 

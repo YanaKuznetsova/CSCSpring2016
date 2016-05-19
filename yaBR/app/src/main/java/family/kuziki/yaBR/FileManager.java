@@ -21,8 +21,23 @@ import java.util.List;
 
 public class FileManager extends ListActivity {
     ProgressDialog dialog;
-    private List<String> directoryEntries = new ArrayList<String>();
+    TextView title;
+    private List<DirectoryData> directoryEntries = new ArrayList<>();
     private File currentDirectory = Environment.getExternalStorageDirectory();
+
+    private static class DirectoryData{
+        String path;
+        String name;
+        DirectoryData(String filePath, String fileName){
+            path = filePath;
+            name = fileName;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
 
     //when application started
     @Override
@@ -34,11 +49,8 @@ public class FileManager extends ListActivity {
         //browse to root directory
 //        browseTo(new File("/"));
 //        Log.d("Clicker:", Boolean.toString(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())));
+        title = (TextView) findViewById(R.id.titleManager);
         browseTo(Environment.getExternalStorageDirectory());
-
-        dialog = new ProgressDialog(this);
-        dialog.setMessage("Opening Book");
-        dialog.setCancelable(false);
     }
 
     //browse to parent directory
@@ -57,11 +69,16 @@ public class FileManager extends ListActivity {
             currentDirectory = aDirectory;
             fill(aDirectory.listFiles());
             //set titleManager text
-            TextView titleManager = (TextView) findViewById(R.id.titleManager);
+            title.setText(currentDirectory.getAbsolutePath());
         } else {
             Intent bookReaderIntent = new Intent(FileManager.this, BookReader.class);
             bookReaderIntent.putExtra("fileToOpen", aDirectory.getAbsolutePath());
-            bookReaderIntent.putExtra("title", aDirectory.getName());
+            String fileName = aDirectory.getName();
+            int pos = fileName.lastIndexOf(".");
+            if (pos > 0) {
+                fileName = fileName.substring(0, pos);
+            }
+            bookReaderIntent.putExtra("title", fileName);
             startActivity(bookReaderIntent);
         }
     }
@@ -71,19 +88,18 @@ public class FileManager extends ListActivity {
         //clear list
         directoryEntries.clear();
         if (currentDirectory.getParent() != null) {
-            directoryEntries.add("..");
+            directoryEntries.add (new DirectoryData("..", "..")) ;
         }
         //add every file into list
         for (File file : files) {
-            directoryEntries.add(file.getAbsolutePath());
+            directoryEntries.add(new DirectoryData(file.getAbsolutePath(), file.getName()));
         }
-
         //create array adapter to show everything
-        ArrayAdapter<String> directoryList = new ArrayAdapter<String>(this, R.layout.file_manager_row, directoryEntries);
-        directoryList.sort(new Comparator<String>() {
+        ArrayAdapter<DirectoryData> directoryList = new ArrayAdapter<DirectoryData>(this, R.layout.file_manager_row, directoryEntries);
+        directoryList.sort(new Comparator<DirectoryData>() {
             @Override
-            public int compare(String a, String b) {
-                return a.compareTo(b);
+            public int compare(DirectoryData a, DirectoryData b) {
+                return a.name.compareTo(b.name);
             }
         });
         setListAdapter(directoryList);
@@ -94,7 +110,7 @@ public class FileManager extends ListActivity {
     protected void onListItemClick(ListView listView, View view, int position, long id) {
         //get selected file name
         int selectionRowId = position;
-        String selectedFileString = directoryEntries.get(selectionRowId);
+        String selectedFileString = directoryEntries.get(selectionRowId).path;
         Log.d("CLICKER: ", selectedFileString);
 
         //if we select ".." then go upper

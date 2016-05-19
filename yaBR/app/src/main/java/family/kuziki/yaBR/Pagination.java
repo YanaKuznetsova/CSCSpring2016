@@ -24,8 +24,6 @@ public class Pagination {
         this.textView = view;
         pages = new ArrayList<>();
         currentPage = 0;
-
-        layout();
     }
 
     public CharSequence getPage() {
@@ -33,14 +31,14 @@ public class Pagination {
     }
 
     public void nextPage() {
-        currentPage = Math.min(currentPage+1, pages.size());
+        currentPage = Math.min(currentPage+1, pages.size()-1);
     }
 
     public void previousPage() {
         currentPage = Math.max(currentPage-1, 0);
     }
 
-    private void layout() {
+    public void layout(Task t) {
         int width = textView.getWidth() - textView.getPaddingLeft() - textView.getPaddingRight();
         int height = textView.getHeight() - textView.getPaddingTop() - textView.getPaddingBottom();
         StaticLayout staticLayout = new StaticLayout(source, textView.getPaint(), width, Layout.Alignment.ALIGN_NORMAL, textView.getLineSpacingMultiplier(), textView.getLineSpacingExtra(), textView.getIncludeFontPadding());
@@ -50,6 +48,7 @@ public class Pagination {
         int startPos = 0;
         int curHeight = height;
 
+        int oldPercent = -1;
         for (int i = 0; i < lineCount; i++) {
             if (curHeight < staticLayout.getLineBottom(i)) {
                 pages.add(text.subSequence(startPos, staticLayout.getLineStart(i)));
@@ -59,6 +58,15 @@ public class Pagination {
             if (i == lineCount - 1) {
                 pages.add(text.subSequence(startPos, staticLayout.getLineEnd(i)));
             }
+            int newPercent = (int)(1.0*i/lineCount * 100);
+            if (newPercent != oldPercent) {
+                t.action(newPercent);
+                oldPercent = newPercent;
+            }
         }
+    }
+
+    public interface Task {
+        void action(int num);
     }
 }

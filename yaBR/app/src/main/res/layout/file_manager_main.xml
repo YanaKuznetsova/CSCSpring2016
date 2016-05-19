@@ -6,7 +6,9 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/titleManager"
-        android:padding="5dip">
+        android:padding="5dip"
+        android:text="File Manager"
+        android:textSize="19dp">
     </TextView>
 
     <ListView

@@ -1,4 +1,7 @@
 package family.kuziki.yaBR.translation;
+/**
+ * Database with initial words and the translations
+ */
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

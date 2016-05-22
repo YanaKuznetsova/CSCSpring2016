@@ -1,4 +1,7 @@
 package family.kuziki.yaBR;
+/**
+ * Main activity: opens when application starts.
+ * */
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,31 +15,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import org.json.JSONException;
-
 import java.io.IOException;
-
 import family.kuziki.yaBR.library.Library;
 import family.kuziki.yaBR.library.LibraryAdapter;
 import family.kuziki.yaBR.library.LibraryItem;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
-
     TextView mainTextView;
     ListView mainListView;
     LibraryAdapter libraryAdapter;
     Button mainButton;
-    EditText mainEditText;
     ShareActionProvider shareActionProvider;
-    private static final String TITLE = "title";
-    private static final String AUTHOR = "author";
-    private static final String COVER = "cover";
     private static final String PREFS = "prefs";
-//    private static final String PREF_NAME = "name";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mainButton.setOnClickListener(this);
         mainListView = (ListView) findViewById(R.id.main_listview);
         mainListView.setOnItemClickListener(this);
-        //setShareIntent();
         libraryAdapter = new LibraryAdapter(this, getLayoutInflater());
         try {
             SharedPreferences sharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
@@ -70,7 +62,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         libraryAdapter.updateData();
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -82,31 +73,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
-//    private void setShareIntent() {
-//        if (shareActionProvider != null) {
-//            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-//            shareIntent.setType("text/plain");
-//            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Android Development");
-//            shareIntent.putExtra(Intent.EXTRA_TEXT, mainTextView.getText());
-//            shareActionProvider.setShareIntent(shareIntent);
-//        }
-//    }
-
+    // open file manager
     @Override
     public void onClick(View v) {
         Log.d("Main", "onClick");
         Intent fileManagerIntent = new Intent(this, FileManager.class);
         Log.d("Main", "fileManagerIntent");
         startActivity(fileManagerIntent);
-    /*    try {
-            queryBooks(mainEditText.getText().toString());
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
     }
 
+    // open selected book
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         LibraryItem item = (LibraryItem) libraryAdapter.getItem(position);
@@ -118,20 +94,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bookReaderIntent.putExtra("fromLibrary", true);
         startActivity(bookReaderIntent);
     }
-
-//    public void displayWelcome() {
-//        sharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
-//        String name = sharedPreferences.getString(PREF_NAME, "");
-//        if (name.length() > 0) {
-////            Toast.makeText(this, "Welcome back, " + name + "!", Toast.LENGTH_LONG).show();
-//        }  else {
-////            // Grab the EditText's input
-////            String inputName = input.getText().toString();
-////            // Put it into memory (don't forget to commit!)
-////            SharedPreferences.Editor e = sharedPreferences.edit();
-////            e.putString(PREF_NAME, inputName);
-////            e.commit();
-//        }
-//    }
 
 }

@@ -1,18 +1,14 @@
 package family.kuziki.yaBR;
 
+/**
+ * Class providing pagination of the book content
+ */
+
 import android.text.Layout;
 import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.view.View;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
-/**
- * Created by Admin on 018 18.05.16.
- */
 public class Pagination {
     private final ArrayList<CharSequence> pages;
     private final CharSequence source;
@@ -30,14 +26,17 @@ public class Pagination {
         return pages.get(currentPage);
     }
 
+    // display next page
     public void nextPage() {
         currentPage = Math.min(currentPage+1, pages.size()-1);
     }
 
+    // display previous page
     public void previousPage() {
         currentPage = Math.max(currentPage-1, 0);
     }
 
+    // do pagination
     public void layout(Task t) {
         int width = textView.getWidth() - textView.getPaddingLeft() - textView.getPaddingRight();
         int height = textView.getHeight() - textView.getPaddingTop() - textView.getPaddingBottom();

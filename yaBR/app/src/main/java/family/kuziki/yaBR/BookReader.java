@@ -1,7 +1,9 @@
 package family.kuziki.yaBR;
+/**
+ * Class handling with book content: pagination, word highlighting, process on click.
+ */
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,18 +23,11 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-
 import ebook.*;
 import ebook.parser.*;
 import family.kuziki.yaBR.library.Library;
@@ -40,7 +35,6 @@ import family.kuziki.yaBR.library.LibraryItem;
 import family.kuziki.yaBR.translation.Database;
 import family.kuziki.yaBR.translation.Translator;
 
-//public class BookReader extends Activity implements View.OnClickListener, View.OnLongClickListener {
 public class BookReader extends Activity {
 
     public String fileToOpen;
@@ -55,7 +49,6 @@ public class BookReader extends Activity {
     private boolean isClick = false;
     private boolean fromLibrary;
     private int screenWidth;
-
     private Pagination pagination;
 
     private class BookLoader extends AsyncTask<Void, Integer, Void> {
@@ -231,7 +224,7 @@ public class BookReader extends Activity {
         v.vibrate(time);
     }
 
-    public String convertTitle() {
+    private String convertTitle() {
         if (fromLibrary) {
             return title;
         }
@@ -241,28 +234,18 @@ public class BookReader extends Activity {
         return (p.matcher(bookTitle).replaceAll(""));
     }
 
-    public void update() {
+    private void update() {
         text = (TextView) findViewById(R.id.openedFile);
         text.setMovementMethod(new ScrollingMovementMethod());
         text.setText(highlight(pagination.getPage()));
     }
 
-    public EBook parseBook() {
-        Parser parser = new InstantParser();
-        EBook ebook = parser.parse(fileToOpen);
-        if (ebook.isOk) {
-            // do anything with ebook
-        }
-        return ebook;
-    }
     private void goToPreviousPage() {
-        //Toast.makeText(this, "Previous page", Toast.LENGTH_LONG).show();
         pagination.previousPage();
         update();
     }
 
     private void goToNextPage() {
-        //Toast.makeText(this, "Next page", Toast.LENGTH_LONG).show();
         pagination.nextPage();
         update();
     }
@@ -272,7 +255,7 @@ public class BookReader extends Activity {
         private static final long MIN_CLICK_DURATION = 650;
         private final GestureDetector gestureDetector;
 
-        public OnSwipeTouchListener (Context ctx){
+        private OnSwipeTouchListener (Context ctx){
             gestureDetector = new GestureDetector(ctx, this);
         }
 
@@ -344,11 +327,11 @@ public class BookReader extends Activity {
             return result;
         }
 
-        public void onSwipeRight() {
+        private void onSwipeRight() {
             goToPreviousPage();
         }
 
-        public void onSwipeLeft() {
+        private void onSwipeLeft() {
             goToNextPage();
         }
 

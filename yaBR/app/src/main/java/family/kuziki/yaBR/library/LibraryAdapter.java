@@ -1,4 +1,7 @@
 package family.kuziki.yaBR.library;
+/**
+ * Class-adapter for displaying all books from Library in MainActivity
+ */
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,10 +16,6 @@ import family.kuziki.yaBR.R;
 
 public class LibraryAdapter extends BaseAdapter {
     private static final String IMAGE_URL_BASE = "http://covers.openlibrary.org/b/id/";
-//    private static final String QUERY_URL = "http://openlibrary.org/search.json?q=";
-//    private static final String TITLE = "title";
-//    private static final String AUTHOR = "author";
-//    private static final String COVER = "cover";
 
     Context context;
     LayoutInflater inflater;
@@ -47,6 +46,7 @@ public class LibraryAdapter extends BaseAdapter {
         return position;
     }
 
+    // creates a row with book info and book cover
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;

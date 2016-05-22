@@ -1,5 +1,9 @@
 package family.kuziki.yaBR.library;
 
+/**
+ * Class providing handling LibraryItems
+ */
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
@@ -7,7 +11,6 @@ import android.util.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,16 +22,11 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.regex.Pattern;
-
 import family.kuziki.yaBR.GetJSON;
 
+
 public class Library {
-    private static final String IMAGE_URL_BASE = "http://covers.openlibrary.org/b/id/";
     private static final String QUERY_URL = "http://openlibrary.org/search.json?q=";
-    private static final String TITLE = "title";
-    private static final String AUTHOR = "author";
-    private static final String COVER = "cover";
     private static final String PREFS = "prefs";
 
     ArrayList<LibraryItem> libraryItems;
@@ -46,10 +44,12 @@ public class Library {
         public static Library instance = new Library();
     }
 
+    // getting all available books
     public ArrayList<LibraryItem> getLibraryItems(){
         return libraryItems;
     }
 
+    // adding new book to library
     public boolean addLibraryItem(LibraryItem item) {
         for (LibraryItem li : libraryItems) {
             if ((li.getFilepath() != null) && (StringUtils.equals(li.getFilepath(), item.getFilepath()))) {
@@ -60,6 +60,7 @@ public class Library {
         return true;
     }
 
+    // getting all possible info about the book from open sources
     public LibraryItem getBookInfo(String fileName) throws ExecutionException, InterruptedException, MalformedURLException {
         String urlString = "";
         String bookTitle = fileName.replace("_", " ");
@@ -72,7 +73,6 @@ public class Library {
         Log.d("query", "URL :" + urlString);
         JSONObject response = new GetJSON(urlString).getJson();
         JSONObject jsonObject = response.optJSONArray("docs").optJSONObject(0);
-        //Log.d("LibraryBookInfo_response", jsonObject.toString());
 
         String authorName = "";
         LibraryItem newItem = new LibraryItem();
@@ -97,6 +97,7 @@ public class Library {
         return newItem;
     }
 
+    // save book info to Shared Preferences
     public void saveBooks(Context context) throws IOException {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         Log.d("Library", "saveBooks");
@@ -110,6 +111,7 @@ public class Library {
         Log.d("Library", "editorCommit");
     }
 
+    // load book info from Shared Preferences
     public void loadBooks(Context context) throws JSONException, IOException, ClassNotFoundException {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         Map<String,?> keys = sharedPreferences.getAll();
@@ -120,7 +122,7 @@ public class Library {
         }
     }
 
-    public static String serialize(LibraryItem li) throws IOException {
+    private static String serialize(LibraryItem li) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream( baos );
         oos.writeObject(li);
@@ -128,7 +130,7 @@ public class Library {
         return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 
-    public static LibraryItem deserialize(String str) throws IOException, ClassNotFoundException {
+    private static LibraryItem deserialize(String str) throws IOException, ClassNotFoundException {
         byte [] data = Base64.decode(str, Base64.DEFAULT);
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
         Object o  = ois.readObject();

@@ -1,11 +1,11 @@
 package family.kuziki.yaBR;
 
-import android.os.AsyncTask;
-import android.util.Log;
+/**
+ * Class sending JSON requests and receiving responses.
+ */
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -23,30 +23,23 @@ public class GetJSON  {
         this.url = new URL(url);
     }
 
+    // send request and receive response
     public JSONObject getJson() {
-
         StringBuilder result = new StringBuilder();
-
         try {
             urlConnection = (HttpURLConnection) url.openConnection();
             InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
             String line;
             while ((line = reader.readLine()) != null) {
                 result.append(line);
             }
 
-        }catch( Exception e) {
+        } catch( Exception e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             urlConnection.disconnect();
-        }
-
-
-        try {
+        } try {
             return new JSONObject(String.valueOf(result));
         } catch (JSONException e) {
             e.printStackTrace();

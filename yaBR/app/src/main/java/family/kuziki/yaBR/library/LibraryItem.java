@@ -1,8 +1,11 @@
 package family.kuziki.yaBR.library;
 
+/**
+ * Class allowing to handle and save the data of the book (the author, title, filepath and cover) in the Library
+ */
+
 import android.util.Base64;
 import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;

@@ -1,9 +1,9 @@
 package family.kuziki.yaBR;
-
-import android.util.Log;
+/**
+ * Class-wrapper for e-book
+ */
 
 import ebook.EBook;
-import ebook.Person;
 
 public class EBookWrapper {
 

@@ -1,5 +1,7 @@
 package family.kuziki.yaBR;
-
+/**
+ * File manager allowing selection files on device
+ */
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -10,17 +12,12 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class FileManager extends ListActivity {
-    ProgressDialog dialog;
     TextView title;
     private List<DirectoryData> directoryEntries = new ArrayList<>();
     private File currentDirectory = Environment.getExternalStorageDirectory();
@@ -41,14 +38,11 @@ public class FileManager extends ListActivity {
 
     //when application started
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         Log.d("FileManager", "onCreate");
         super.onCreate(savedInstanceState);
         //set file_manager_main layout
         setContentView(R.layout.file_manager_main);
-        //browse to root directory
-//        browseTo(new File("/"));
-//        Log.d("Clicker:", Boolean.toString(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())));
         title = (TextView) findViewById(R.id.titleManager);
         browseTo(Environment.getExternalStorageDirectory());
     }
